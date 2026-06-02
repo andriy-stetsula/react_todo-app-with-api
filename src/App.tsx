@@ -307,7 +307,7 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className={cn('filter__link', {
-                  selected: selected === 'all',
+                  selected: selected === FILTERS.all,
                 })}
                 data-cy="FilterLinkAll"
                 onClick={() => setSelected(FILTERS.all)}
