@@ -49,7 +49,7 @@ export const App: React.FC = () => {
           ),
         ),
       )
-      .catch(() => setError(''))
+      .catch(() => setError(ERROR.LOAD__UPDATE))
       .finally(() => {
         setLoadingIds(prev => prev.filter(ids => ids !== currentTodo.id));
         autoFocus.current?.focus();
