@@ -208,15 +208,20 @@ export const App: React.FC = () => {
                 className={`todo ${todos.completed ? 'completed' : ''}`}
                 key={todos.id}
               >
-                <input
-                  id={`todo-${todos.id}`}
-                  data-cy="TodoStatus"
-                  type="checkbox"
-                  className="todo__status"
-                  checked={todos.completed}
-                  onChange={() => handleUpdate(todos)}
-                />
-
+                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */}
+                <label
+                  className="todo__status-label"
+                  htmlFor={`todo-${todos.id}`}
+                >
+                  <input
+                    id={`todo-${todos.id}`}
+                    data-cy="TodoStatus"
+                    type="checkbox"
+                    className="todo__status"
+                    checked={todos.completed}
+                    onChange={() => handleUpdate(todos)}
+                  />
+                </label>
                 {edit === todos.id ? (
                   <input
                     value={editTitle}
@@ -274,15 +279,13 @@ export const App: React.FC = () => {
 
         {tempTodo && (
           <div data-cy="Todo" className="todo">
-            <label className="todo__status-label" htmlFor={`temp-todo`}>
-              <span className="visually-hidden">Todo status</span>
-              <input
-                id="temp-todo"
-                type="checkbox"
-                className="todo__status"
-                readOnly
-              />
-            </label>
+            <input
+              id="temp-todo"
+              type="checkbox"
+              className="todo__status"
+              readOnly
+            />
+
             <span data-cy="TodoTitle" className="todo__title">
               {tempTodo.title}
             </span>
