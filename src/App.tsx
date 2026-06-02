@@ -15,6 +15,9 @@ enum FILTERS {
 
 enum ERROR {
   LOAD__ERROR = 'Unable to add a todo',
+  LOAD__DELETE = 'Unable to delete a todo',
+  LOAD__UPDATE = 'Unable to update a todo',
+  LOAD__TITLE = 'Title should not be empty',
 }
 
 export const App: React.FC = () => {
@@ -46,9 +49,9 @@ export const App: React.FC = () => {
           ),
         ),
       )
-      .catch(() => setError('Unable to update a todo'))
+      .catch(() => setError(''))
       .finally(() => {
-        setLoadingIds(prev => prev.filter(Ids => Ids !== currentTodo.id));
+        setLoadingIds(prev => prev.filter(ids => ids !== currentTodo.id));
         autoFocus.current?.focus();
       });
   };
@@ -56,16 +59,18 @@ export const App: React.FC = () => {
   const handleDelete = (id: number) => {
     setLoadingIds(prev => [...prev, id]);
     deleteTodo(id)
-      .then(() => setTodo(prev => prev.filter(t => t.id !== id)))
-      .catch(() => setError('Unable to delete a todo'))
+      .then(() => setTodo(prev => prev.filter(todos => todos.id !== id)))
+      .catch(() => setError(ERROR.LOAD__DELETE))
       .finally(() => {
-        setLoadingIds(prev => prev.filter(Ids => Ids !== id));
+        setLoadingIds(prev => prev.filter(ids => ids !== id));
         autoFocus.current?.focus();
       });
   };
 
   const clearCompleted = () => {
-    todo.filter(t => t.completed).forEach(t => handleDelete(t.id));
+    todo
+      .filter(todos => todos.completed)
+      .forEach(todos => handleDelete(todos.id));
   };
 
   const handleUpdateTodo = () => {
@@ -102,16 +107,16 @@ export const App: React.FC = () => {
         );
         setEdit(null);
       })
-      .catch(() => setError('Unable to update a todo'))
+      .catch(() => setError(ERROR.LOAD__UPDATE))
       .finally(() =>
-        setLoadingIds(prev => prev.filter(Ids => Ids !== currentTodo.id)),
+        setLoadingIds(prev => prev.filter(ids => ids !== currentTodo.id)),
       );
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!title.trim()) {
-      setError('Title should not be empty');
+      setError(ERROR.LOAD__TITLE);
 
       return;
     }
