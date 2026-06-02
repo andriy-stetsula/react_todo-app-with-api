@@ -1,17 +1,20 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useRef } from 'react';
 import { UserWarning } from './UserWarning';
 import { USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
 import { getTodos, addTodo, deleteTodo, updateTodo } from './api/todos';
 import { useEffect, useState } from 'react';
+import { getFilterTodos } from './helpers';
 import cn from 'classnames';
 
 enum FILTERS {
   all = 'all',
   completed = 'completed',
   active = 'active',
+}
+
+enum ERROR {
+  LOAD__ERROR = 'Unable to add a todo',
 }
 
 export const App: React.FC = () => {
@@ -131,7 +134,7 @@ export const App: React.FC = () => {
         setTitle('');
       })
 
-      .catch(() => setError('Unable to add a todo'))
+      .catch(() => setError(ERROR.LOAD__ERROR))
       .finally(() => {
         setLoading(false);
         setTempTodo(null);
@@ -149,6 +152,7 @@ export const App: React.FC = () => {
     getTodos()
       .then(data => setTodo(data))
       .catch(() => setError(LOAD_ERROR.LOAD_TODOS));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -159,17 +163,7 @@ export const App: React.FC = () => {
     }
   }, [error]);
 
-  const filterTodo = todo.filter(todos => {
-    if (selected === 'active') {
-      return !todos.completed;
-    }
-
-    if (selected === FILTERS.completed) {
-      return todos.completed;
-    }
-
-    return true;
-  });
+  const filterTodos = getFilterTodos(todo, selected);
 
   if (!USER_ID) {
     return <UserWarning />;
@@ -208,21 +202,20 @@ export const App: React.FC = () => {
         </header>
         {todo.length > 0 && (
           <section className={cn('todoapp__main')} data-cy="TodoList">
-            {filterTodo.map(todos => (
+            {filterTodos.map((todos: Todo) => (
               <div
                 data-cy="Todo"
                 className={`todo ${todos.completed ? 'completed' : ''}`}
                 key={todos.id}
               >
-                <label className="todo__status-label">
-                  <input
-                    data-cy="TodoStatus"
-                    type="checkbox"
-                    className="todo__status"
-                    checked={todos.completed}
-                    onChange={() => handleUpdate(todos)}
-                  />
-                </label>
+                <input
+                  id={`todo-${todos.id}`}
+                  data-cy="TodoStatus"
+                  type="checkbox"
+                  className="todo__status"
+                  checked={todos.completed}
+                  onChange={() => handleUpdate(todos)}
+                />
 
                 {edit === todos.id ? (
                   <input
@@ -281,8 +274,14 @@ export const App: React.FC = () => {
 
         {tempTodo && (
           <div data-cy="Todo" className="todo">
-            <label className="todo__status-label">
-              <input type="checkbox" className="todo__status" readOnly />
+            <label className="todo__status-label" htmlFor={`temp-todo`}>
+              <span className="visually-hidden">Todo status</span>
+              <input
+                id="temp-todo"
+                type="checkbox"
+                className="todo__status"
+                readOnly
+              />
             </label>
             <span data-cy="TodoTitle" className="todo__title">
               {tempTodo.title}
